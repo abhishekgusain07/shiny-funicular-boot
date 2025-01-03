@@ -1,0 +1,47 @@
+
+
+services:
+  db:
+    image: postgres
+    container_name: db_postgres
+    environment:
+      POSTGRES_USER: gusain
+      POSTGRES_PASSWORD: gusain
+      POSTGRES_DB: mydatabase
+    ports:
+      - 5432:5432
+    volumes:
+      - one_app:/var/lib/one_app/data
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gusain -d mydatabase" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: abhishek@gusain.com
+      PGADMIN_DEFAULT_PASSWORD: gusain
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pg_admin:/var/lib/pg_admin
+    networks:
+      - app_network
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  one_app:
+  pg_admin:
+
+networks:
+  app_network:
+    driver: bridge
